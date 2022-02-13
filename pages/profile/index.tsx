@@ -8,6 +8,7 @@ import {logout} from "../../redux/actions/authAction";
 const Profile = (session: any) => {
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch()
+    console.log(session,'wrappper seesssio')
 
     const logoutHandle = async () => {
         setLoading(true)

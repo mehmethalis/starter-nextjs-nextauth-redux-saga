@@ -2,6 +2,7 @@ import NextAuth from 'next-auth'
 import {NextApiRequest} from "next"
 import CredentialsProvider from "next-auth/providers/credentials";
 import {AuthService} from "../../../services/authService";
+import {JWT} from "next-auth/jwt";
 
 const providers = [
     CredentialsProvider({
@@ -24,18 +25,29 @@ const providers = [
         }
     })
 ]
+
+let accessToken: any, exp: any, iat: any, id: any
+
 const callbacks = {
-    // Getting the JWT token from API response with user attribute
+    // Getting the JWT token and overwrite from API response with user attribute
     async jwt({token, user}: any) {
         if (user) {
-            token.accessToken = user.token
-            token.email = user.email
-            token.userId = user.id
+            accessToken = user.token
+            exp = user.exp
+            iat = user.iat
+            id = user.id
+        }
+        if (token.jti) {
+            token.accessToken = accessToken
+            token.id = id
+            token.exp = exp
+            token.iat = iat
         }
         return token
     },
 
     async session({session, token}: any) {
+        session.expires = await new Date(token.exp * 1000);
         return {...session, ...token}
     }
 }
